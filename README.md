@@ -23,3 +23,8 @@ Para el ejercicio de perfilamiento se utilizó la herramienta <a href="https://s
 Como se puede observar en la <i>fig. 2.</i> el 98.12% de las llamadas se hicieron mientras el algoritmo
 se encontraba en la función <i>jacobi</i>. Esta será la función donde concentraremos la mayor parte
 del esfuerzo de optimización.
+
+## Optimización ## 
+<b>Resultados de ejecución inicial:</b><br>
+<img src="./img/time1.JPG"/><br>
+<i>fig. 3. Resultados de ejecución inicial</i>
