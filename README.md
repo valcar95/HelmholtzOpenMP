@@ -8,7 +8,7 @@ Para el ejercicio de perfilamiento se utilizó la herramienta <a href="https://s
 <br>
 <b>Resultados del perfilamiento:</b><br>
 <table>
-<tr style="vertical-align:bottom; text-align:center">
+<tr valign="bottom" style="vertical-align:bottom; text-align:center">
 <td>
 <img src="./img/jacobi2.JPG"/><br>
 <i>fig. 1: Call Graph</i>
