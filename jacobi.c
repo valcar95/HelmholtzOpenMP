@@ -334,13 +334,13 @@ int main(int argc, char* argv[]){
     double *u, *f, dx, dy;
     double r1;
 
-    n=2000;
+    /*n=2000;
     m=2000;
     alpha=0.8;
     relax=1;
     tol=1e-15;
-    mits=50;
-    /* Read info 
+    mits=50;*/
+    //Read info 
     printf("Input n,m - grid dimension in x,y direction :\n ");
     scanf("%d,%d", &n, &m);
     printf("Input alpha - Helmholts constant : \n");
@@ -351,7 +351,7 @@ int main(int argc, char* argv[]){
     scanf("%lf", &tol);
     printf("Input mits - Maximum iterations for solver:\n ");
     scanf("%d", &mits);
-    */ 
+    
     printf("-> %d, %d, %f, %f, %f, %d\n",
            n, m, alpha, relax, tol, mits);
     
