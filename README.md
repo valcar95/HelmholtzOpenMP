@@ -8,14 +8,16 @@ Para el ejercicio de perfilamiento se utilizó la herramienta <a href="https://s
 <br>
 <b>Resultados del perfilamiento:</b><br>
 <table>
-<tr valign="bottom" style="vertical-align:bottom; text-align:center">
+<tr valign="bottom">
 <td>
 <img src="./img/jacobi2.JPG"/><br>
 <i>fig. 1: Call Graph</i>
 </td>
 <td>
+<center>
 <img src="./img/jacobi3.JPG"/><br>
 <i>fig. 2: Callees</i>
+</center>
 </td>
 </tr>
 </table>
