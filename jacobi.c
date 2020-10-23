@@ -21,6 +21,8 @@
 #define U(i,j) u[(i)*n+(j)]
 #define UOLD(i,j) uold[(i)*n+(j)]
 #define F(i,j) f[(i)*n+(j)]
+#define BLOCK_X 8
+#define BLOCK_Y 8
 /* 
 ******************************************************************
 * Subroutine HelmholtzJ
@@ -46,6 +48,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <omp.h>
 
 void jacobi (
              int n, 
@@ -60,7 +63,7 @@ void jacobi (
              int maxit )
 
 {
-  int i,j,k;
+  int i,j,k,j_base,i_base;
   double error, resid, ax, ay, b;
   double *uold;
   
@@ -80,34 +83,134 @@ void jacobi (
   k = 1;
 
   while (k <= maxit && error > tol) {
-
-    error = 0.0;
     /* copy new solution into old */
+    #pragma omp parallel for collapse(2)
     for (j=0; j<m; j++)
+    {
       for (i=0; i<n; i++){
         UOLD(j,i) = U(j,i);
       }
-
+    }
     /* compute stencil, residual and update */
-    for (j=1; j<m-1; j++){
-      for (i=1; i<n-1; i++){
+    double error_inside = 0.0;
+    double result;
+/*
+    #pragma omp parallel for reduction(+:error_inside) private(i,j,resid,result) 
+    for(j=1; j<m-1; j+=1){
+      for(i=1; i<n-1; i+=1){
         resid =(
                 ax * (UOLD(j,i-1) + UOLD(j,i+1))
                 + ay * (UOLD(j-1,i) + UOLD(j+1,i))
                 + b * UOLD(j,i) - F(j,i)
                 ) / b;
         
-        /* update solution */
         U(j,i) = UOLD(j,i) - omega * resid;
-
-        /* accumulate residual error */
-        error =error + resid*resid;
-
+        result=resid*resid;
+        error_inside += result;
       }
     }
+    */
+
+    #pragma omp parallel for reduction(+:error_inside) private(j_base,i_base,i,j,resid,result)
+    for(j_base=1; j_base<m-1; j_base+=BLOCK_Y){
+      for(i_base=1; i_base<n-1; i_base+=BLOCK_X){
+        for (j=j_base; j<j_base+BLOCK_Y; j+=8){
+          for (i=i_base; i<i_base+BLOCK_X; i+=8){
+            resid =(
+                    ax * (UOLD(j,i-1) + UOLD(j,i+1))
+                    + ay * (UOLD(j-1,i) + UOLD(j+1,i))
+                    + b * UOLD(j,i) - F(j,i)
+                    ) / b;
+            
+            U(j,i) = UOLD(j,i) - omega * resid;
+
+            result=resid*resid;
+            error_inside += result;
+
+            resid =(
+                    ax * (UOLD(j,i) + UOLD(j,i+2))
+                    + ay * (UOLD(j-1,i+1) + UOLD(j+1,i+1))
+                    + b * UOLD(j,i+1) - F(j,i+1)
+                    ) / b;
+            
+            U(j,i+1) = UOLD(j,i+1) - omega * resid;
+
+            result=resid*resid;
+            error_inside += result;
+
+            resid =(
+                    ax * (UOLD(j,i+1) + UOLD(j,i+3))
+                    + ay * (UOLD(j-1,i+2) + UOLD(j+1,i+2))
+                    + b * UOLD(j,i+2) - F(j,i+2)
+                    ) / b;
+            
+            U(j,i+2) = UOLD(j,i+2) - omega * resid;
+
+            result=resid*resid;
+            error_inside += result;
+
+            resid =(
+                    ax * (UOLD(j,i+2) + UOLD(j,i+4))
+                    + ay * (UOLD(j-1,i+3) + UOLD(j+1,i+3))
+                    + b * UOLD(j,i+3) - F(j,i+3)
+                    ) / b;
+            
+            U(j,i+3) = UOLD(j,i+3) - omega * resid;
+
+            result=resid*resid;
+            error_inside += result;
+
+            resid =(
+                    ax * (UOLD(j,i+3) + UOLD(j,i+5))
+                    + ay * (UOLD(j-1,i+4) + UOLD(j+1,i+4))
+                    + b * UOLD(j,i+4) - F(j,i+4)
+                    ) / b;
+            
+            U(j,i+4) = UOLD(j,i+4) - omega * resid;
+
+            result=resid*resid;
+            error_inside += result;
+
+            resid =(
+                    ax * (UOLD(j,i+4) + UOLD(j,i+6))
+                    + ay * (UOLD(j-1,i+5) + UOLD(j+1,i+5))
+                    + b * UOLD(j,i+5) - F(j,i+5)
+                    ) / b;
+            
+            U(j,i+5) = UOLD(j,i+5) - omega * resid;
+
+            result=resid*resid;
+            error_inside += result;
+
+            resid =(
+                    ax * (UOLD(j,i+5) + UOLD(j,i+7))
+                    + ay * (UOLD(j-1,i+6) + UOLD(j+1,i+6))
+                    + b * UOLD(j,i+6) - F(j,i+6)
+                    ) / b;
+            
+            U(j,i+6) = UOLD(j,i+6) - omega * resid;
+
+            result=resid*resid;
+            error_inside += result;
+
+            resid =(
+                    ax * (UOLD(j,i+6) + UOLD(j,i+8))
+                    + ay * (UOLD(j-1,i+7) + UOLD(j+1,i+7))
+                    + b * UOLD(j,i+7) - F(j,i+7)
+                    ) / b;
+            
+            U(j,i+7) = UOLD(j,i+7) - omega * resid;
+
+            result=resid*resid;
+            error_inside += result;
+          }
+        }
+      }
+    }
+    
     /* error check */
     k++;
-    error = sqrt(error) /(n*m);
+    error = sqrt(error_inside) /(n*m);
 
   } /* while */
 
@@ -231,7 +334,13 @@ int main(int argc, char* argv[]){
     double *u, *f, dx, dy;
     double r1;
 
-    /* Read info */ 
+    n=2000;
+    m=2000;
+    alpha=0.8;
+    relax=1;
+    tol=1e-15;
+    mits=50;
+    /* Read info 
     printf("Input n,m - grid dimension in x,y direction :\n ");
     scanf("%d,%d", &n, &m);
     printf("Input alpha - Helmholts constant : \n");
@@ -242,6 +351,7 @@ int main(int argc, char* argv[]){
     scanf("%lf", &tol);
     printf("Input mits - Maximum iterations for solver:\n ");
     scanf("%d", &mits);
+    */ 
     printf("-> %d, %d, %f, %f, %f, %d\n",
            n, m, alpha, relax, tol, mits);
     

@@ -25,6 +25,12 @@ se encontraba en la función <i>jacobi</i>. Esta será la función donde concent
 del esfuerzo de optimización.
 
 ## Optimización ## 
-<b>Resultados de ejecución inicial:</b><br>
+<b>Resultados de ejecución inicial:</b><br><br>
 <img src="./img/time1.JPG"/><br>
-<i>fig. 3. Resultados de ejecución inicial</i>
+<i>fig. 3. Resultados de ejecución sin optimización</i>
+
+<b>Referencias</b>
+
+<ul>
+<li><a href="https://m-sp.org/downloads/pp_report_openmp.pdf">https://m-sp.org/downloads/pp_report_openmp.pdf</a></li>
+</ul>
