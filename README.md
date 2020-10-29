@@ -32,9 +32,59 @@ del esfuerzo de optimización.
 
 <b>Técnica de optimización:</b><br>
 
-La principal optimización se realizó sobre el método jacobi, específicamente en el segundo for anidado dentro del while. Allí se aplicó el patrón tiling con el objetivo de disminuir el número de cache misses al momento de obtener datos de nuestro array bidimensional. El tamaño del tile para las filas se calculó con base en la línea de caché [1], mientras el tamaño tile de las columnas se dejó en 1 (se probaron otros tamaños, pero el mejor resultado fue con un tamaño de 1). Dado que cada iteración del ciclo anidado sumaba sus resultados a una variable compartida, también se utilizó la directiva <i>reduction</i> de OpenMP. Se aplicaron otras optimizaciones sobre otras regiones principalmente con la directiva <i>collapse</i> para mejorar la distribución de las iteraciones en ciclos anidados. Adicionalmente en cada iteración se propone ejecutar dos veces el cálculo (con índices i y i+1) con el objetivo de hacer un mejor uso de las unidades aritméticas que pueda tener cada procesador [2].  
+La principal optimización se realizó sobre el método jacobi, específicamente en el segundo for anidado dentro del while. Allí se aplicó el patrón tiling con el objetivo de disminuir el número de cache misses al momento de obtener datos de nuestro array bidimensional. El tamaño del tile para las filas se calculó con base en la línea de caché [1], mientras el tamaño tile de las columnas se dejó en 1 (se probaron otros tamaños, pero el mejor resultado fue con un tamaño de 1). Dado que cada iteración del ciclo anidado sumaba sus resultados a una variable compartida, también se utilizó la directiva <i>reduction</i> de OpenMP. Por otra parte, en cada iteración se propone ejecutar dos veces el cálculo (con índices i y i+1) con el objetivo de hacer un mejor uso de las unidades aritméticas que pueda tener cada procesador [2]. Finalmente, se aplicaron otras optimizaciones sobre otras regiones principalmente con la directiva <i>collapse</i> para mejorar la distribución de las iteraciones en ciclos anidados.   
 
+<br>
 
+<table>
+    <thead>
+        <tr>
+            <th># threads</th>
+            <th>elapsed time</th>
+            <th>MFlops</th>
+            <th>Speedup</th>
+            <th>Efficiency</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Secuencial</td>
+            <td>2.832</td>
+            <td>916.105</td>
+            <td>N/A</td>
+            <td>N/A</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>1.546</td>
+            <td>1677.95</td>
+            <td>1.832</td>
+            <td>0.916</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>1.088</td>
+            <td>2384.78</td>
+            <td>2.603</td>
+            <td>0.651</td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td>0.984</td>
+            <td>2635.92</td>
+            <td>2.878</td>
+            <td>0.360</td>
+        </tr>
+        <tr>
+            <td>16</td>
+            <td>0.871</td>
+            <td>2977.52</td>
+            <td>3.248</td>
+            <td>0.203</td>
+        </tr>
+    </tbody>
+</table>
+<i>Tabla 1. Tiempos de ejecución vs número de hilos</i>
 
 <b>Referencias</b>
 
