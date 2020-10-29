@@ -23,6 +23,7 @@
 #define F(i,j) f[(i)*n+(j)]
 #define BLOCK_X 8
 #define BLOCK_Y 8
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
 /* 
 ******************************************************************
 * Subroutine HelmholtzJ
@@ -50,6 +51,9 @@
 #include <stdlib.h>
 #include <omp.h>
 
+
+int get_cache_line_size();
+
 void jacobi (
              int n, 
              int m, 
@@ -63,9 +67,18 @@ void jacobi (
              int maxit )
 
 {
-  int i,j,k,j_base,i_base;
+  int i,j,k,BFj, BFi;
   double error, resid, ax, ay, b;
   double *uold;
+
+  int cache_line_size=get_cache_line_size();
+  int align=cache_line_size/sizeof(int);
+
+  //BFj=m/sqrt(omp_get_max_threads())/4;
+  BFj=1;
+  
+  BFi=n/sqrt(omp_get_max_threads())/4;
+  BFi=(BFi+align-1)/align*align;
   
   uold = (double *) malloc(sizeof(double)*n*m);
   if (!uold){
@@ -94,120 +107,40 @@ void jacobi (
     /* compute stencil, residual and update */
     double error_inside = 0.0;
     double result;
-/*
-    #pragma omp parallel for reduction(+:error_inside) private(i,j,resid,result) 
-    for(j=1; j<m-1; j+=1){
-      for(i=1; i<n-1; i+=1){
-        resid =(
+
+    int jj,ii;
+    #pragma omp parallel for reduction(+:error_inside) collapse(2) private(jj,ii,i,j,resid,result)
+    for(jj=1; jj<m-1; jj+=BFj){
+      for(ii=1; ii<n-1; ii+=BFi){
+        int jmax=min(jj+BFj,m-1);
+        int imax=min(ii+BFi,n-1);
+        for (j=jj; j<jmax; j++){
+          for (i=ii+1; i<imax; i+=2){
+            resid =(
+                ax * (UOLD(j,i-2) + UOLD(j,i))
+                + ay * (UOLD(j-1,i-1) + UOLD(j+1,i-1))
+                + b * UOLD(j,i-1) - F(j,i-1)
+                ) / b;
+        
+            U(j,i-1) = UOLD(j,i-1) - omega * resid;
+            result=resid*resid;
+            error_inside += result;
+
+            resid =(
                 ax * (UOLD(j,i-1) + UOLD(j,i+1))
                 + ay * (UOLD(j-1,i) + UOLD(j+1,i))
                 + b * UOLD(j,i) - F(j,i)
                 ) / b;
         
-        U(j,i) = UOLD(j,i) - omega * resid;
-        result=resid*resid;
-        error_inside += result;
-      }
-    }
-    */
-
-    #pragma omp parallel for reduction(+:error_inside) private(j_base,i_base,i,j,resid,result)
-    for(j_base=1; j_base<m-1; j_base+=BLOCK_Y){
-      for(i_base=1; i_base<n-1; i_base+=BLOCK_X){
-        for (j=j_base; j<j_base+BLOCK_Y; j+=8){
-          for (i=i_base; i<i_base+BLOCK_X; i+=8){
-            resid =(
-                    ax * (UOLD(j,i-1) + UOLD(j,i+1))
-                    + ay * (UOLD(j-1,i) + UOLD(j+1,i))
-                    + b * UOLD(j,i) - F(j,i)
-                    ) / b;
-            
             U(j,i) = UOLD(j,i) - omega * resid;
-
             result=resid*resid;
             error_inside += result;
-
-            resid =(
-                    ax * (UOLD(j,i) + UOLD(j,i+2))
-                    + ay * (UOLD(j-1,i+1) + UOLD(j+1,i+1))
-                    + b * UOLD(j,i+1) - F(j,i+1)
-                    ) / b;
             
-            U(j,i+1) = UOLD(j,i+1) - omega * resid;
-
-            result=resid*resid;
-            error_inside += result;
-
-            resid =(
-                    ax * (UOLD(j,i+1) + UOLD(j,i+3))
-                    + ay * (UOLD(j-1,i+2) + UOLD(j+1,i+2))
-                    + b * UOLD(j,i+2) - F(j,i+2)
-                    ) / b;
-            
-            U(j,i+2) = UOLD(j,i+2) - omega * resid;
-
-            result=resid*resid;
-            error_inside += result;
-
-            resid =(
-                    ax * (UOLD(j,i+2) + UOLD(j,i+4))
-                    + ay * (UOLD(j-1,i+3) + UOLD(j+1,i+3))
-                    + b * UOLD(j,i+3) - F(j,i+3)
-                    ) / b;
-            
-            U(j,i+3) = UOLD(j,i+3) - omega * resid;
-
-            result=resid*resid;
-            error_inside += result;
-
-            resid =(
-                    ax * (UOLD(j,i+3) + UOLD(j,i+5))
-                    + ay * (UOLD(j-1,i+4) + UOLD(j+1,i+4))
-                    + b * UOLD(j,i+4) - F(j,i+4)
-                    ) / b;
-            
-            U(j,i+4) = UOLD(j,i+4) - omega * resid;
-
-            result=resid*resid;
-            error_inside += result;
-
-            resid =(
-                    ax * (UOLD(j,i+4) + UOLD(j,i+6))
-                    + ay * (UOLD(j-1,i+5) + UOLD(j+1,i+5))
-                    + b * UOLD(j,i+5) - F(j,i+5)
-                    ) / b;
-            
-            U(j,i+5) = UOLD(j,i+5) - omega * resid;
-
-            result=resid*resid;
-            error_inside += result;
-
-            resid =(
-                    ax * (UOLD(j,i+5) + UOLD(j,i+7))
-                    + ay * (UOLD(j-1,i+6) + UOLD(j+1,i+6))
-                    + b * UOLD(j,i+6) - F(j,i+6)
-                    ) / b;
-            
-            U(j,i+6) = UOLD(j,i+6) - omega * resid;
-
-            result=resid*resid;
-            error_inside += result;
-
-            resid =(
-                    ax * (UOLD(j,i+6) + UOLD(j,i+8))
-                    + ay * (UOLD(j-1,i+7) + UOLD(j+1,i+7))
-                    + b * UOLD(j,i+7) - F(j,i+7)
-                    ) / b;
-            
-            U(j,i+7) = UOLD(j,i+7) - omega * resid;
-
-            result=resid*resid;
-            error_inside += result;
           }
         }
       }
     }
-    
+   
     /* error check */
     k++;
     error = sqrt(error_inside) /(n*m);
@@ -280,6 +213,7 @@ void initialize(
   *dy = 2.0 / (m-1);
 
   /* Initilize initial condition and RHS */
+  #pragma omp parallel for collapse(2)
   for (j=0; j<m; j++){
     for (i=0; i<n; i++){
       xx = -1.0 + *dx * (i-1);
@@ -311,7 +245,7 @@ void error_check(
   dx = 2.0 / (n-1);
   dy = 2.0 / (m-1);
   error = 0.0;
-
+  #pragma omp parallel for reduction(+:error) private(i,j,xx, yy, temp)
   for (j=0; j<m; j++){
     for (i=0; i<n; i++){
       xx = -1.0 + dx * (i-1);
@@ -327,20 +261,22 @@ void error_check(
 
 }
 
+int get_cache_line_size(){
+  FILE *fp;
+  char var[4];
+  fp = popen("getconf LEVEL1_DCACHE_LINESIZE", "r");
+  fgets(var, sizeof(var), fp);
+  pclose(fp);
+  return  atoi(var);
+}
 
 
 
 int main(int argc, char* argv[]){
     double *u, *f, dx, dy;
     double r1;
-
-    /*n=2000;
-    m=2000;
-    alpha=0.8;
-    relax=1;
-    tol=1e-15;
-    mits=50;*/
     //Read info 
+    
     printf("Input n,m - grid dimension in x,y direction :\n ");
     scanf("%d,%d", &n, &m);
     printf("Input alpha - Helmholts constant : \n");
