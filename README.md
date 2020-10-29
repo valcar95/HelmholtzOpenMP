@@ -36,6 +36,8 @@ La principal optimización se realizó sobre el método jacobi, específicamente
 
 <br>
 
+## Resultados ## 
+
 <table>
     <thead>
         <tr>
@@ -84,7 +86,22 @@ La principal optimización se realizó sobre el método jacobi, específicamente
         </tr>
     </tbody>
 </table>
-<i>Tabla 1. Tiempos de ejecución vs número de hilos</i>
+<i>tabla 1. Tiempos de ejecución vs número de hilos</i><br>
+
+<b>Perfilamiento luego de la optimización:</b><br>
+<table>
+<tr valign="bottom">
+<td>
+<img src="./img/jacobi22.JPG"/><br>
+<i>fig. 4. Call Graph después de la optimización</i>
+</td>
+<td>
+<img src="./img/jacobi32.JPG"/><br>
+<i>fig. 5. Callees después de la optimización</i>
+</td>
+</tr>
+</table><br>
+
 
 <b>Referencias</b>
 
