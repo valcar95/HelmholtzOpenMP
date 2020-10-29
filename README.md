@@ -99,10 +99,24 @@ La principal optimización se realizó sobre el método jacobi, específicamente
 <i>fig. 5. Callees después de la optimización</i>
 </td>
 </tr>
-</table><br>
+</table>
+
+## Conclusiones ## 
+
+<ul>
+    <li>
+        El perfilamiento nos ayuda a entender mejor cuáles son las regiones del código que requieren atención por su alto nivel de procesamiento.
+    </li>
+    <li>
+        El patrón <i>tiling</i> es de gran utilidad cuándo tenemos procesamiento sobre arrays multidimensionales, sin embargo, siempre es muy importante definir un buen tamaño del tile para evitar al máximo los cache misses.
+    </li>
+    <li>
+        La directiva <i>collapse</i> de OpenMP nos ayuda a distribuir mejor las iteraciones a cada hilo cuando tenemos ciclos anidados.
+    </li>
+</ul>
 
 
-<b>Referencias</b>
+## Referencias ## 
 
 <ul>
     <li>
