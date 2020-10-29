@@ -34,7 +34,6 @@ del esfuerzo de optimización.
 
 La principal optimización se realizó sobre el método jacobi, específicamente en el segundo for anidado dentro del while. Allí se aplicó el patrón tiling con el objetivo de disminuir el número de cache misses al momento de obtener datos de nuestro array bidimensional. El tamaño del tile para las filas se calculó con base en la línea de caché [1], mientras el tamaño tile de las columnas se dejó en 1 (se probaron otros tamaños, pero el mejor resultado fue con un tamaño de 1). Dado que cada iteración del ciclo anidado sumaba sus resultados a una variable compartida, también se utilizó la directiva <i>reduction</i> de OpenMP. Por otra parte, en cada iteración se propone ejecutar dos veces el cálculo (con índices i y i+1) con el objetivo de hacer un mejor uso de las unidades aritméticas que pueda tener cada procesador [2]. Finalmente, se aplicaron otras optimizaciones sobre otras regiones principalmente con la directiva <i>collapse</i> para mejorar la distribución de las iteraciones en ciclos anidados.   
 
-<br>
 
 ## Resultados ## 
 
