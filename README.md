@@ -87,7 +87,7 @@ La principal optimización se realizó sobre el método jacobi, específicamente
     </tbody>
 </table>
 <i>tabla 1. Tiempos de ejecución vs número de hilos</i><br>
-
+<br>
 <b>Perfilamiento luego de la optimización:</b><br>
 <table>
 <tr valign="bottom">
