@@ -96,7 +96,7 @@ La principal optimización se realizó sobre el método jacobi, específicamente
 <i>fig. 4. Call Graph después de la optimización</i>
 </td>
 <td>
-<img src="./img/jacobi32.JPG"/><br>
+<img src="./img/jacobi33.JPG"/><br>
 <i>fig. 5. Callees después de la optimización</i>
 </td>
 </tr>
